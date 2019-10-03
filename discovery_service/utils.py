@@ -29,7 +29,7 @@ class BroadcastAddress:
         print("Subnet:", ipaddress.IPv4Address(int(host) & int(net.netmask)))
         print("Host:", ipaddress.IPv4Address(int(host) & int(net.hostmask)))
         print("Broadcast:", net.broadcast_address)
-        self.broadcast_address = str(net.broadcast_address)
+        return str(net.broadcast_address)
 
 
 class UDPTools:
@@ -50,3 +50,7 @@ class UDPTools:
 
     def send(self, payload):
         threading.Thread(target=self._send, args=(payload,)).start()
+
+    
+
+

@@ -4,12 +4,12 @@ import ipaddress
 import json
 from socket import *
 import threading
-from . import logmaster
+from discovery_service import logmaster
 import os
-from . import moyogatoming
-from  . import args.args as args
+from discovery_service import moyogatoming
+from discovery_service.args import args
 from collections import defaultdict
-from . utils import BroadcastAddress, UDPTools
+from discovery_service.utils import BroadcastAddress, UDPTools
 
 
 lock = threading.Lock()
@@ -77,22 +77,21 @@ class Discovery(UDPBroadcast):
             if payload["type"] == "data":
                 now = time.time()
                 logger.info(f"device: {red}{ip}{reset}")
-                if args.log:
-                    for device in self.data:
-                        if (self.data[device]["timestamp"] + args.diminish) < now and (
-                            self.data[device]["timestamp"] + args.unregister
-                        ) > now:
-                            logger.info(
-                                f"device: {red}{device}{reset} with ip: {self.data[device]['ip']} was last reached {now - self.data[device]['timestamp']} ago"
-                            )
-                        elif (self.data[device]["timestamp"] + args.unregister) < now:
-                            logger.info(
-                                f"device: {red}{device}{reset} with ip: {self.data[device]['ip']} is propably lost"
-                            )
-                        else:
-                            logger.info(
-                                f"device: {blue}{device}{reset} with ip: {self.data[device]['ip']} was reached {now - self.data[device]['timestamp']} ago"
-                            )
+                for device in self.data:
+                    if (self.data[device]["timestamp"] + args.diminish) < now and (
+                        self.data[device]["timestamp"] + args.unregister
+                    ) > now:
+                        logger.info(
+                            f"device: {red}{device}{reset} with ip: {self.data[device]['ip']} was last reached {now - self.data[device]['timestamp']} ago"
+                        )
+                    elif (self.data[device]["timestamp"] + args.unregister) < now:
+                        logger.info(
+                            f"device: {red}{device}{reset} with ip: {self.data[device]['ip']} is propably lost"
+                        )
+                    else:
+                        logger.info(
+                            f"device: {blue}{device}{reset} with ip: {self.data[device]['ip']} was reached {now - self.data[device]['timestamp']} ago"
+                        )
 
         else:
             print(payload)
@@ -122,8 +121,7 @@ class Lighthouse(Discovery):
     def _serve_forever(self):
         self.loop_forever()
         time.sleep(1.5)
-        if args.log:
-            logger.info("Looking for devices")
+        logger.info("Looking for devices")
         now = time.time()
 
         while True:
@@ -132,25 +130,35 @@ class Lighthouse(Discovery):
             if time.time() - now < 30:
                 now = time.time()
                 self.data = copy.deepcopy(self.devices)
-                if args.log:
-                    for device in self.data:
-                        if (self.data[device]["timestamp"] + args.diminish) < now and (
-                            self.data[device]["timestamp"] + args.unregister
-                        ) > now:
-                            logger.info(
-                                f"device: {red}{device}{reset} with ip: {self.data[device]['ip']} was last reached {now - self.data[device]['timestamp']} ago"
-                            )
-                        elif (self.data[device]["timestamp"] + args.unregister) < now:
-                            logger.info(
-                                f"device: {red}{device}{reset} with ip: {self.data[device]['ip']} is being UNREGISTERED"
-                            )
-                        else:
-                            logger.info(
-                                f"device: {blue}{device}{reset} with ip: {self.data[device]['ip']} was reached {now - self.data[device]['timestamp']} ago"
-                            )
+                for device in self.data:
+                    if (self.data[device]["timestamp"] + args.diminish) < now and (
+                        self.data[device]["timestamp"] + args.unregister
+                    ) > now:
+                        logger.info(
+                            f"device: {red}{device}{reset} with ip: {self.data[device]['ip']} was last reached {now - self.data[device]['timestamp']} ago"
+                        )
+                    elif (self.data[device]["timestamp"] + args.unregister) < now:
+                        logger.info(
+                            f"device: {red}{device}{reset} with ip: {self.data[device]['ip']} is being UNREGISTERED"
+                        )
+                    else:
+                        logger.info(
+                            f"device: {blue}{device}{reset} with ip: {self.data[device]['ip']} was reached {now - self.data[device]['timestamp']} ago"
+                        )
                 with lock:
                     self.devices = self.data
                 print(self.data)
+
+def cli():
+    try:
+        ip, bca = 'Unknown' , args.broadcast_address #BroadcastAddress.bca_awk()[0]
+    except:
+        raise ValueError('Propably no broadcast found')
+
+    service = Lighthouse(id=moyogatoming.manage_nickname(args.id), ip=ip, broadcast_address=bca)
+    service.serve_forever()
+    while True:
+        time.sleep(1)
 
 if __name__ == '__main__':
     try:

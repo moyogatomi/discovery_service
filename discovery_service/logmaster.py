@@ -1,7 +1,7 @@
 # From https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output
 
 import logging
-
+from discovery_service.args import args
 
 class CustomFormatter(logging.Formatter):
     """Logging Formatter to add colors and count warning / errors"""
@@ -47,7 +47,7 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def logger_obj(app_name, level="DEBUG"):
+def logger_obj(app_name, level=args.log):
     # create logger with 'spam_application'
     logger = logging.getLogger(app_name)
     logger.setLevel(level)

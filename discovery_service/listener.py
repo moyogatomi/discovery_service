@@ -3,12 +3,7 @@ import threading
 import socket
 import json
 import argparse
-
-parser = argparse.ArgumentParser(description="Listener service.")
-parser.add_argument("--port", help="broadcast port", type=int, default=6565)
-parser.add_argument("--broadcast_address", help="broadcast port", type=str, default="")
-args = parser.parse_args()
-
+from discovery_service.args import args
 
 
 Lock = threading.Lock()
@@ -34,12 +29,13 @@ class UDPBroadcast:
             counter += 1
             print(f"{counter} -- {payload}")
 
+   
+
 
 if __name__ == "__main__":
-
-    from . import logmaster
+    from discovery_service import logmaster
     
-    logger = logmaster.logger_obj("UDP listener", level="INFO")
+    logger = logmaster.logger_obj("UDP listener", level=args.log)
     logger.info("Initialized sniffer")
     udp_sniff = UDPBroadcast()
     udp_sniff.loop_forever()
