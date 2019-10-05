@@ -161,11 +161,20 @@ def cli():
         time.sleep(1)
 
 if __name__ == '__main__':
+    print((os.popen('hostname -I').read(),'255.255.255.0'),flush=True)
+    print(os.popen('hostname -I').read(),flush=True)
     try:
-        ip, bca = BroadcastAddress.bca_awk()[0]
+        if not args.docker:
+            ip, bca = os.popen('hostname -I').read(),BroadcastAddress.bca_awk()[0]
+        else:
+            bcas = BroadcastAddress.bca_awk()
+            for i in bcas:
+                if i[0][0:3]=='172':
+                    ip, bca = i
+            #ip, bca_s = os.popen('hostname -I').read(), BroadcastAddress.get_broadcast_address((os.popen('hostname -I').read().strip(),'255.255.0.0'))
+
     except:
         raise ValueError('Propably no broadcast found')
-
     service = Lighthouse(id=moyogatoming.manage_nickname(), ip=ip, broadcast_address=bca)
     service.serve_forever()
     while True:

@@ -3,6 +3,7 @@ import json
 import os
 import time
 import threading
+import ipaddress
 
 
 class BroadcastAddress:
@@ -54,3 +55,4 @@ class UDPTools:
     
 
 
+#BroadcastAddress.get_broadcast_address(('10.0.0.55','255.255.255.0'))

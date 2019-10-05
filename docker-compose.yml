@@ -1,0 +1,29 @@
+version: '2'
+
+
+services:
+  discovery_service:
+    container_name: listener
+    build: .
+    expose:
+      - "${PORT}"
+    env_file: 
+      - '.env'
+
+  discovery_service_pulse:
+    build: .
+    container_name: pulser
+    expose:
+      - "${PORT}"
+    env_file: 
+      - '.env'
+    command: ["python","discovery_service/service.py"]
+
+  discovery_service_pulse2:
+    build: .
+    container_name: pulser2
+    expose:
+      - "${PORT}"
+    env_file: 
+      - '.env'
+    command: ["python","discovery_service/service.py"]

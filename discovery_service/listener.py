@@ -3,6 +3,8 @@ import threading
 import socket
 import json
 import argparse
+import os
+print(os.getcwd(),os.listdir('/'))
 from discovery_service.args import args
 
 
